@@ -5,7 +5,7 @@ There is support to fine-tune the models using custom datasets that haven't been
 Some of the models trained and evaluated using these scripts can be found [here on huggingface](https://huggingface.co/vasista22).
 
 
-## Table of Contents
+## Contents
 
 - [Setup](#setup)
 - [Data Preparation for custom datasets](#data-preparation-for-custom-datasets)
@@ -15,6 +15,7 @@ Some of the models trained and evaluated using these scripts can be found [here 
 - [Evaluate on a custom dataset](#evaluate-on-a-custom-dataset)
 - [Transcribe a single audio file](#transcribe-a-single-audio-file)
 - [Faster evaluation with whisper-jax](#faster-evaluation-with-whisper-jax)
+- [Extract embeddings from whisper models](#extract-embeddings-from-whisper-models)
 - [Interesting works around Whisper](#interesting-works-around-whisper)
 
 
@@ -285,7 +286,7 @@ pip install --upgrade "jax[cuda11_pip]" -f https://storage.googleapis.com/jax-re
 pip install git+https://github.com/sanchit-gandhi/whisper-jax.git
 ```
 
-whisper-jax can only be used on those models which also have their flax weights available over huggingface. To push the flax weights for existing models, one may follow the instructions given [here](https://github.com/sanchit-gandhi/whisper-jax#available-models-and-languages).
+**NOTE:** whisper-jax can only be used on those models which also have their flax weights available over huggingface. To push the flax weights for existing models, one may follow the instructions given [here](https://github.com/sanchit-gandhi/whisper-jax#available-models-and-languages).
 
 Following is a sample command to evaluate the model on a dataset from huggingface:
 
@@ -334,6 +335,68 @@ python3 jax_transcribe_audio.py \
 --device 0 \
 --half_precision True \
 --batch_size 16
+```
+
+## Extract embeddings from whisper models
+
+Given the enormous amount of speech data that Whisper models have been trained on, embeddings from these models (original/fine-tuned) can also be used for other speech downstream tasks apart from Automatic Speech Recognition (ASR).
+
+The following table contains the dimensions of the encoder and decoder embeddings for different model sizes:
+| Model Size | Embedding Dimension | Number of Layers |
+|   :---:    |        :---:        |       :---:      |
+|   tiny     |        384          |         4        |
+|   base     |        512          |         6        |
+|   small    |        768          |        12        |
+|   medium   |        1024         |        24        |
+|   large    |        1280         |        32        |
+|   large-v2 |        1280         |        32        |
+
+The different embeddings available from the whisper Seq2Seq model output are:
+- `encoder_last_hidden_state` - The output of the last layer of the encoder post layer norm.
+- `encoder_hidden_states` - List of embeddings from every layer of the encoder. For example, the whisper tiny model would have 5 embeddings in this list. The indices 0 to 3 in this list would be the embeddings from the layer-1 to layer-4 of the encoder. The index-4 in this list, which is the 5-th embedding is same as `encoder_last_hidden_state`. That is, it corresponds to the final encoder layer's embedding after a layer-norm is applied.
+- `last_hidden_state` - The output of the last layer of the decoder post layer norm.
+- `decoder_hidden_states` - List of embeddings from every layer of the decoder. For example, the whisper tiny model would have 5 embeddings in this list. The indices 0 to 3 in this list would be the embeddings from the layer-1 to layer-4 of the decoder. The index-4 in this list, which is the 5-th embedding is same as `last_hidden_state`. That is, it corresponds to the final decoder layer's embedding after a layer-norm is applied.
+
+The embeddings from the encoder could be used for downstream tasks such as Speaker Verification, Speaker Diarization, Speech Enhancement etc., where the speaker related information is more relevant.
+
+When it comes to downstream tasks such as Keyword Spotting, Phoneme Recognition etc., which have more to do with the semantics of the data, the embeddings from the decoder could help better.
+
+The following code snippet can be used to extract the different embeddings discussed above.
+
+**NOTE:**
+- Ensure that the audio segment being passed is no longer than 30 seconds in duration. This is because whisper's positional embeddings etc., are designed to handle speech segments that are atmost 30 seconds in duration. The features from longer audios are truncated and the features from shorter ones are padded. The [WhisperConfig](https://github.com/huggingface/transformers/blob/main/src/transformers/models/whisper/configuration_whisper.py#L62) class specifies in the definition of `max_source_positions` argument that `1500` is 'The maximum sequence length of log-mel filter-bank features that this model might ever be used with.' This in terms of time duration coressponds to 30 seconds.
+- The mean of the embeddings of any layer can be used to represent that particular layer's output for the audio segment through a single embedding.
+
+```python
+
+import torch
+from datasets import Dataset, Audio
+from transformers import AutoFeatureExtractor, WhisperModel
+
+audio_segment_path="/path/to/the/audio_file"  # pass the path to the audio segment (<= 30 seconds) here.
+
+model = WhisperModel.from_pretrained("vasista22/whisper-kannada-small")  # The model ID to use can be changed here
+feature_extractor = AutoFeatureExtractor.from_pretrained("vasista22/whisper-kannada-small")  # The model ID to use can be changed here
+model.eval()
+
+audio_read = Dataset.from_dict({"audio": [audio_segment_path]}).cast_column("audio", Audio(sampling_rate=16_000))
+inputs = feature_extractor(audio_read['audio'][0]['array'], sampling_rate=16_000, return_tensors="pt")
+input_features = inputs.input_features
+
+model.config.output_hidden_states=True
+decoder_input_ids = torch.tensor([[1, 1]]) * model.config.decoder_start_token_id
+
+whisper_embeddings = model(input_features, decoder_input_ids=decoder_input_ids)
+
+print('\n Last layer embeddings from whisper encoder post layer-norm: ', whisper_embeddings.encoder_last_hidden_state)
+print('\n Mean of last layer embeddings from whisper encoder post layer-norm: ', torch.mean(whisper_embeddings.encoder_last_hidden_state, dim=1))
+print('\n Embeddings from the 8-th encoder layer: ', whisper_embeddings.encoder_hidden_states[7])
+print('\n Mean of the embeddings from the 8-th encoder layer: ', torch.mean(whisper_embeddings.encoder_hidden_states[7], dim=1))
+print('\n Last layer embeddings of whisper decoder post layer-norm: ', whisper_embeddings.last_hidden_state)
+print('\n Mean of last layer embeddings from whisper decoder post layer-norm: ', torch.mean(whisper_embeddings.last_hidden_state, dim=1))
+print('\n Embeddings from the 8-th decoder layer: ', whisper_embeddings.decoder_hidden_states[7])
+print('\n Mean of the embeddings from the 8-th decoder layer: ', torch.mean(whisper_embeddings.decoder_hidden_states[7], dim=1))
+
 ```
 
 ## Interesting works around Whisper
