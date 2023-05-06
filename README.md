@@ -379,11 +379,12 @@ model = WhisperModel.from_pretrained("vasista22/whisper-kannada-small")  # The m
 feature_extractor = AutoFeatureExtractor.from_pretrained("vasista22/whisper-kannada-small")  # The model ID to use can be changed here
 model.eval()
 
+# creating a pseudo dataset to extract features for the audio segment
 audio_read = Dataset.from_dict({"audio": [audio_segment_path]}).cast_column("audio", Audio(sampling_rate=16_000))
 inputs = feature_extractor(audio_read['audio'][0]['array'], sampling_rate=16_000, return_tensors="pt")
 input_features = inputs.input_features
 
-model.config.output_hidden_states=True
+model.config.output_hidden_states=True  # to obtain the individual layer embeddings
 decoder_input_ids = torch.tensor([[1, 1]]) * model.config.decoder_start_token_id
 
 whisper_embeddings = model(input_features, decoder_input_ids=decoder_input_ids)
