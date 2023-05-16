@@ -7,7 +7,7 @@ Some of the models trained and evaluated using these scripts can be found [here 
 
 ## Contents
 
-- [Setup](#setup)
+- [Setup](#setup-⚙️)
 - [Data Preparation for custom datasets](#data-preparation-for-custom-datasets)
 - [Hyperparameter tuning](#hyperparameter-tuning)
 - [Fine-tune on a dataset from huggingface](#fine-tune-on-a-dataset-from-huggingface)
