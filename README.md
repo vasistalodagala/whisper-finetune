@@ -1,7 +1,7 @@
 # Fine-tuning and evaluating Whisper models for Automatic Speech Recognition
 
 This repository contains the relevant scripts to fine-tune and evaluate Whisper models of various configurations available over huggingface 🤗.
-There is support to fine-tune the models using custom datasets that haven't been made available over huggingface.
+Scripts in this repository support fine-tuning these models using custom datasets which haven't been made available over huggingface.
 Some of the models trained and evaluated using these scripts can be found [here on huggingface](https://huggingface.co/vasista22).
 
 
@@ -9,6 +9,7 @@ Some of the models trained and evaluated using these scripts can be found [here 
 
 - [Setup](#setup)
 - [Data Preparation for custom datasets](#data-preparation-for-custom-datasets)
+- [Hyperparameter tuning](#hyperparameter-tuning)
 - [Fine-tune on a dataset from huggingface](#fine-tune-on-a-dataset-from-huggingface)
 - [Fine-tune on a custom dataset](#fine-tune-on-a-custom-dataset)
 - [Evaluate on a dataset from huggingface](#evaluate-on-a-dataset-from-huggingface)
@@ -33,12 +34,11 @@ python3 -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-In order to push your model to huggingface, you would need to login using the command line interface. Also, `git-lfs` would need to be installed to push large model files. The following commands should help in this regard:
+In order to push your model to huggingface, you would need to login using the command line interface. Also, `git-lfs` would need to be installed to push large model files. Executing the following commands should help in this regard:
 ```bash
 sudo apt-get install git-lfs
 huggingface-cli login
 ```
-
 
 ## Data Preparation for custom datasets
 
@@ -79,6 +79,22 @@ python3 custom_data/data_prep.py \
 
 Use the `python3 custom_data/data_prep.py -h` command for further detail on its usage.
 
+## Hyperparameter tuning
+
+Learning rate is one of the most important hyperparameters while trying to adapt/fine-tune models, and more so with models such as Whisper which have been pre-trained on vast amounts of data.
+
+According to Jong Wook Kim, one of the authors of the Whisper paper, a practical learning rate to consider while fine-tuning is a value that is 40x smaller than what has been used for pre-training, and linearly decay it to 0 over the course of training. ([Discord thread where this has been mentioned](https://discord.com/channels/879548962464493619/1050020275250548836/1050369079111856168))
+
+The following table contains the suggested learning rates for the different model configurations for the fine-tuning experiments:
+
+| Model Size | Max Learning Rate (paper) | Suggested fine-tuning Learning Rate (40x smaller) |
+|   :---:    |           :---:           |                      :---:                        |
+|   tiny     |  $ 1.5 $ x $ 10^{-3} $    |               $ 3.75 $ x $ 10^{-5} $              |
+|   base     |  $ 1 $ x $ 10^{-3} $      |               $ 2.5 $ x $ 10^{-5} $               |
+|   small    |  $ 5 $ x $ 10^{-4} $      |               $ 1.25 $ x $ 10^{-5} $              |
+|   medium   |  $ 2.5 $ x $ 10^{-4} $    |               $ 6.25 $ x $ 10^{-6} $              |
+|   large    |  $ 1.75 $ x $ 10^{-4} $   |               $ 4.375 $ x $ 10^{-6} $             |
+|   large-v2 |  $ 2.0 $ x $ 10^{-4} $    |               $ 5 $ x $ 10^{-6} $                 |
 
 ## Fine-tune on a dataset from huggingface
 
@@ -402,7 +418,7 @@ print('\n Mean of the embeddings from the 8-th decoder layer: ', torch.mean(whis
 
 ## Interesting works around Whisper
 
-Since the release of Whisper models and code from OpenAI, there have been several works that have worked on bringingout and enhancing the capabilities of these models. Following are few such works which can potentially be of some use to developers:
+Since the release of Whisper models and code from OpenAI, there have been several developments in bringing out and enhancing the capabilities of these models. Following are few such works which could potentially be of some use to researchers and developers:
 
 - Efficient Inference
     - [whisper-jax](https://github.com/sanchit-gandhi/whisper-jax)
