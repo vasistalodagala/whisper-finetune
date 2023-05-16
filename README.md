@@ -87,14 +87,14 @@ According to Jong Wook Kim, one of the authors of the Whisper paper, a practical
 
 The following table contains the suggested learning rates for the different model configurations for the fine-tuning experiments:
 
-| Model Size | Max Learning Rate (paper)   | Suggested fine-tuning Learning Rate (40x smaller) |
-|   :---:    |           :---:             |                      :---:                        |
-|   tiny     |  $$ 1.5 $$ x $$ 10^{-3} $$  |               $$ 3.75 $$ x $$ 10^{-5} $$          |
-|   base     |  $$ 1 $$ x $$ 10^{-3} $$    |               $$ 2.5 $$ x $$ 10^{-5} $$           |
-|   small    |  $$ 5 $$ x $$ 10^{-4} $$    |               $$ 1.25 $$ x $$ 10^{-5} $$          |
-|   medium   |  $$ 2.5 $$ x $$ 10^{-4} $$  |               $$ 6.25 $$ x $$ 10^{-6} $$          |
-|   large    |  $$ 1.75 $$ x $$ 10^{-4} $$ |               $$ 4.375 $$ x $$ 10^{-6} $$         |
-|   large-v2 |  $$ 2.0 $$ x $$ 10^{-4} $$  |               $$ 5 $$ x $$ 10^{-6} $$             |
+| Model Size | Max Learning Rate (paper) | Suggested fine-tuning Learning Rate (40x smaller) |
+|   :---:    |           :---:           |                      :---:                        |
+|   tiny     |      $1.5$ x $10^{-3}$    |                  $3.75$ x $10^{-5}$               |
+|   base     |      $1$ x $10^{-3}$      |                  $2.5$ x $10^{-5}$                |
+|   small    |      $5$ x $10^{-4}$      |                  $1.25$ x $10^{-5}$               |
+|   medium   |      $2.5$ x $10^{-4}$    |                  $6.25$ x $10^{-6}$               |
+|   large    |      $1.75$ x $10^{-4}$   |                  $4.375$ x $10^{-6}$              |
+|   large-v2 |      $2.0$ x $10^{-4}$    |                  $5$ x $10^{-6}$                  |
 
 ## Fine-tune on a dataset from huggingface
 
