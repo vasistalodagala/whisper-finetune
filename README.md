@@ -72,6 +72,10 @@ Once the data has been organized in the manner, the script named `custom_data/da
 Following is a sample command to convert the data into the desired format:
 
 ```bash
+
+# source_data_directory is the path to the directory containing the `text` and `audio_paths` files
+# output_data_directory is where the formatted data would be stored
+
 python3 custom_data/data_prep.py \
 --source_data_dir source_data_directory \
 --output_data_dir output_data_directory
@@ -83,7 +87,7 @@ Use the `python3 custom_data/data_prep.py -h` command for further detail on its 
 
 Learning rate is one of the most important hyperparameters while trying to adapt/fine-tune models, and more so with models such as Whisper which have been pre-trained on vast amounts of data.
 
-According to Jong Wook Kim, one of the authors of the Whisper paper, a practical learning rate to consider while fine-tuning is a value that is 40x smaller than what has been used for pre-training, and linearly decay it to 0 over the course of training. ([Discord thread where this has been mentioned](https://discord.com/channels/879548962464493619/1050020275250548836/1050369079111856168))
+According to Jong Wook Kim, one of the authors of the Whisper paper, a practical learning rate to consider while fine-tuning is a value that is 40x smaller than what has been used for pre-training, and linearly decay it to zero over the course of training. ([Discord thread where this has been mentioned](https://discord.com/channels/879548962464493619/1050020275250548836/1050369079111856168))
 
 The following table contains the suggested learning rates for the different model configurations for the fine-tuning experiments:
 
