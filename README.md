@@ -7,7 +7,7 @@ Some of the models trained and evaluated using these scripts can be found [here 
 
 ## Contents
 
-- [Setup](#setup-⚙️)
+- [Setup](#setup)
 - [Data Preparation for custom datasets](#data-preparation-for-custom-datasets)
 - [Hyperparameter tuning](#hyperparameter-tuning)
 - [Fine-tune on a dataset from huggingface](#fine-tune-on-a-dataset-from-huggingface)
@@ -20,7 +20,7 @@ Some of the models trained and evaluated using these scripts can be found [here 
 - [Interesting works around Whisper](#interesting-works-around-whisper)
 
 
-## Setup ⚙️
+## Setup
 
 These scripts have been tested with Python 3.8 and cuda 11.3.
 
