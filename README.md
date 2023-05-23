@@ -433,3 +433,5 @@ Since the release of Whisper models and code from OpenAI, there have been severa
     - [stable-ts](https://github.com/jianfch/stable-ts)
 - Forced Alignment using an external Phoneme based ASR model
     - [whisperX](https://github.com/m-bain/whisperX)
+- Parameter Efficient Fine-tuning
+    - [fast-whisper-finetuning](https://github.com/Vaibhavs10/fast-whisper-finetuning)
